@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recibo</title>
+  <style>
+    /* ===== Variáveis ===== */
+    :root {
+      --cor-texto: #1a1a1a;
+      --cor-secundaria: #555;
+      --cor-borda: #d0d0d0;
+      --cor-destaque: #121cad;
+      --cor-fundo-suave: #f5f7f6;
+      --fonte: "Segoe UI", Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--fonte);
+      color: var(--cor-texto);
+      background: #e9ecef;
+      padding: 24px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ===== Folha A4 ===== */
+    .recibo {
+      width: 210mm;
+      min-height: 148mm; /* meia folha A4 (formato comum de recibo) */
+      max-width: 100%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 18mm 16mm;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+      position: relative;
+    }
+
+    /* ===== Cabeçalho ===== */
+    .cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--cor-destaque);
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+
+    .emissor h2 {
+      font-size: 17px;
+      color: var(--cor-destaque);      
+    }
+
+    .emissor p {
+      font-size: 12px;
+      color: var(--cor-secundaria);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .titulo-bloco {
+      text-align: right;
+    }
+
+    .titulo-bloco h1 {
+      font-size: 30px;
+      letter-spacing: 4px;
+      color: var(--cor-destaque);
+      text-transform: uppercase;
+    }
+
+    .titulo-bloco .numero {
+      font-size: 14px;
+      color: var(--cor-secundaria);
+      margin-top: 4px;
+      margin-right: 4px;
+      font-weight: 600;
+    }
+
+    /* ===== Valor em destaque ===== */
+    .valor-destaque {
+      display: inline-block;
+      background: var(--cor-fundo-suave);
+      border: 1px solid var(--cor-borda);
+      border-left: 4px solid var(--cor-destaque);
+      border-radius: 4px;
+      padding: 10px 18px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cor-destaque);
+      margin-bottom: 26px;
+    }
+
+    .valor-destaque small {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--cor-secundaria);
+      display: block;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== Corpo / texto do recibo ===== */
+    .corpo {
+      font-size: 15px;
+      line-height: 2.1;
+      text-align: justify;
+    }
+
+    .campo {
+      border-bottom: 1px solid var(--cor-borda);
+      padding: 0 4px;
+      font-weight: 600;
+      color: var(--cor-texto);
+    }
+
+    /* ===== Campos editáveis na tela ===== */
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 3px;
+      transition: background 0.15s, box-shadow 0.15s;
+      cursor: text;
+    }
+
+    [contenteditable="true"]:hover {
+      background: rgba(18, 28, 173, 0.06);
+    }
+
+    [contenteditable="true"]:focus {
+      background: rgba(18, 28, 173, 0.10);
+      box-shadow: 0 0 0 2px rgba(18, 28, 173, 0.30);
+    }
+
+    /* Mostra um texto-guia quando o campo fica vazio */
+    [contenteditable="true"]:empty::before {
+      content: attr(data-placeholder);
+      color: #aaa;
+      font-weight: 400;
+    }
+
+    /* ===== Rodapé / assinatura ===== */
+    .rodape {
+      margin-top: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .local-data {
+      font-size: 14px;
+    }
+
+    .assinatura {
+      text-align: center;
+      min-width: 260px;
+    }
+
+    .assinatura .linha {
+      border-top: 1px solid var(--cor-texto);
+      padding-top: 6px;
+      font-size: 13px;
+      color: var(--cor-secundaria);
+    }
+
+    .assinatura .nome {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cor-texto);
+    }
+
+    /* ===== Botões (não aparecem na impressão) ===== */
+    .acoes {
+      max-width: 210mm;
+      margin: 0 auto 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .acoes .dica {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .acoes .botoes {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .acoes button {
+      font-family: var(--fonte);
+      font-size: 14px;
+      background: var(--cor-destaque);
+      color: #fff;
+      border: 1px solid var(--cor-destaque);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .acoes button.secundario {
+      background: #fff;
+      color: var(--cor-destaque);
+    }
+
+    .acoes button:hover {
+      opacity: 0.85;
+    }
+
+    /* ===== Impressão / PDF ===== */
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .recibo {
+        width: 100%;
+        box-shadow: none;
+        padding: 0;
+        min-height: auto;
+      }
+
+      .acoes {
+        display: none !important;
+      }
+
+      [contenteditable="true"] {
+        background: none !important;
+        box-shadow: none !important;
+      }
+
+      [contenteditable="true"]:empty::before {
+        content: "" !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de ações (oculta na impressão) -->
+  <div class="acoes">
+    <span class="dica">✏️ Clique nos campos destacados para editar — tudo é salvo automaticamente</span>
+    <div class="botoes">
+      <button id="btn-limpar" class="secundario">🗑️ Limpar</button>
+      <button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    </div>
+  </div>
+
+  <div class="recibo">
+
+    <!-- Cabeçalho -->
+    <header class="cabecalho">
+      <div class="emissor">
+        <h2 contenteditable="true" spellcheck="false">ELIEL CEZAR CARDOSO CORDEIRO FILHO 04296307940 - MEI</h2>
+        <p>
+          CNPJ/CPF: <span contenteditable="true" spellcheck="false">21.049.024/0001-05</span><br>
+          <span contenteditable="true" spellcheck="false">Rua Anna Gbur Barcik, 499 — Santo Inácio, Curitiba/PR</span><br>
+          <span contenteditable="true" spellcheck="false">elielcezar@gmail.com · (41) 99963-1609</span>
+        </p>
+      </div>
+      <div class="titulo-bloco">
+        <h1>Recibo</h1>
+        <div class="numero">Nº <span contenteditable="true" spellcheck="false">0005/2026</span></div>
+      </div>
+    </header>
+
+    <!-- Valor -->
+    <div class="valor-destaque">
+      <small>VALOR</small>
+      R$ <span contenteditable="true" spellcheck="false">290,00</span>
+    </div>
+
+    <!-- Corpo -->
+    <section class="corpo">
+      Recebi de <span class="campo" contenteditable="true" spellcheck="false" data-placeholder="nome do pagador">Associação Festa na Vila</span>,
+      portador(a) do CPF/CNPJ <span class="campo" contenteditable="true" spellcheck="false" data-placeholder="CPF/CNPJ">123.456.789-00</span>,
+      a importância de <span class="campo" contenteditable="true" spellcheck="false" data-placeholder="valor por extenso">um mil e quinhentos reais</span>,
+      referente a <span class="campo" contenteditable="true" spellcheck="false" data-placeholder="descrição do serviço">prestação de serviços de consultoria</span>.
+      <br><br>
+      Para clareza e como prova de quitação, firmo o presente recibo,
+      dando plena, geral e irrevogável quitação do valor acima descrito.
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="rodape">
+      <div class="local-data">
+        <span contenteditable="true" spellcheck="false">Curitiba/PR</span>, <span contenteditable="true" spellcheck="false">26 de maio de 2026</span>.
+      </div>      
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'recibo:dados';
+      const campos = Array.from(document.querySelectorAll('[contenteditable="true"]'));
+
+      // Guarda o conteúdo padrão de cada campo (usado pelo botão "Limpar")
+      const padroes = campos.map(el => el.innerHTML);
+
+      // Aplica os valores salvos no navegador
+      function carregar() {
+        let dados;
+        try {
+          dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        } catch (e) {
+          dados = {}; // ignora dados corrompidos
+        }
+        campos.forEach((el, i) => {
+          if (dados[i] !== undefined) el.innerHTML = dados[i];
+        });
+      }
+
+      // Salva o conteúdo de todos os campos
+      function salvar() {
+        const dados = {};
+        campos.forEach((el, i) => { dados[i] = el.innerHTML; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+      }
+
+      // Apaga o que foi salvo e volta ao modelo padrão
+      function limpar() {
+        if (!confirm('Apagar os dados salvos e restaurar o modelo padrão?')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        campos.forEach((el, i) => { el.innerHTML = padroes[i]; });
+      }
+
+      // Salva a cada digitação
+      campos.forEach(el => el.addEventListener('input', salvar));
+
+      const btnLimpar = document.getElementById('btn-limpar');
+      if (btnLimpar) btnLimpar.addEventListener('click', limpar);
+
+      carregar();
+    })();
+  </script>
+
+</body>
+</html>
